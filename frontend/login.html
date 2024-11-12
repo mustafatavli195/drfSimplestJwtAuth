@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Login Form</h1>
+    <form id="login-form">
+      <input
+        type="text"
+        name="username"
+        id="username"
+        placeholder="Username"
+        required
+      />
+      <input
+        type="password"
+        name="password"
+        id="password"
+        placeholder="Password"
+        required
+      />
+      <button type="submit" id="button-login">Submit</button>
+    </form>
+    <h1>Register Form</h1>
+
+    <form id="register-form">
+      <input
+        type="text"
+        name="username_register"
+        id="username_register"
+        placeholder="Username"
+        required
+      />
+      <input
+        type="password"
+        name="password_register"
+        id="password_register"
+        placeholder="Password"
+        required
+      />
+      <button type="submit" id="button-register">Submit</button>
+    </form>
+
+    <h1 style="display: none" id="message">Login successful</h1>
+    <h1 style="display: none" id="register_message">
+      Registration successful!
+    </h1>
+  </body>
+  <script>
+    document
+      .getElementById("login-form")
+      .addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const username = document.getElementById("username");
+        const password = document.getElementById("password");
+        const message = document.getElementById("message");
+
+        if (username.value === "" || password.value === "") {
+          alert("Username and password cannot be empty!");
+          return;
+        }
+
+        getUser(username, password);
+
+        async function getUser(username, password) {
+          const URL = "http://localhost:8000/api/user/login/";
+
+          try {
+            const options = {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                username: username.value,
+                password: password.value,
+              }),
+            };
+
+            const RESPONSE = await fetch(URL, options);
+            if (!RESPONSE.ok) {
+              alert("Login failed");
+              return;
+            }
+
+            const DATA = await RESPONSE.json();
+            console.log(DATA.access);
+            console.log(DATA.refresh);
+
+            if (DATA.access && DATA.refresh) {
+              localStorage.setItem("access_token", DATA.access);
+              message.style.display = "block";
+            } else {
+              message.style.display = "none";
+            }
+          } catch (error) {
+            console.log(error);
+            alert(error);
+          }
+        }
+      });
+
+    document
+      .getElementById("register-form")
+      .addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const username_register = document.getElementById("username_register");
+        const password_register = document.getElementById("password_register");
+        const registerMessage = document.getElementById("register_message");
+
+        registerUser(username_register, password_register);
+
+        async function registerUser(username, password) {
+          const URL = "http://localhost:8000/api/user/register/";
+
+          try {
+            const options = {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                username: username_register.value,
+                password: password_register.value,
+              }),
+            };
+
+            const RESPONSE = await fetch(URL, options);
+            if (!RESPONSE.ok) {
+              alert("Registration failed");
+              return;
+            }
+
+            const DATA = await RESPONSE.json();
+            console.log(DATA);
+
+            if (DATA.message === "User created successfully") {
+              registerMessage.style.display = "block";
+            } else {
+              registerMessage.style.display = "none";
+            }
+          } catch (error) {
+            console.log(error);
+            alert(error);
+          }
+        }
+      });
+  </script>
+</html>
